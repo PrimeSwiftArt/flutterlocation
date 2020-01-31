@@ -47,11 +47,13 @@ class Location {
   Future<bool> changeSettings(
           {LocationAccuracy accuracy = LocationAccuracy.HIGH,
           int interval = 1000,
-          double distanceFilter = 0}) =>
+          double distanceFilter = 0,
+          bool enableBackgroundMode = false}) =>
       _channel.invokeMethod('changeSettings', {
         "accuracy": accuracy.index,
         "interval": interval,
-        "distanceFilter": distanceFilter
+        "distanceFilter": distanceFilter,
+        "enableBackground": enableBackgroundMode
       }).then((result) => result == 1);
 
   /// Gets the current location of the user.

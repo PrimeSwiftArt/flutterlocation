@@ -54,6 +54,9 @@
             self.clLocationManager = [[CLLocationManager alloc] init];
             self.clLocationManager.delegate = self;
             self.clLocationManager.desiredAccuracy = kCLLocationAccuracyBest;
+            if (@available(iOS 9, *)) {
+                self.clLocationManager.allowsBackgroundLocationUpdates = NO;
+            }
         }
     }
 }
@@ -77,6 +80,10 @@
                 distanceFilter = kCLDistanceFilterNone;
             }
             self.clLocationManager.distanceFilter = distanceFilter;
+            if (@available(iOS 9, *)) {
+                self.clLocationManager.allowsBackgroundLocationUpdates =
+                    [call.arguments[@"enableBackground"] boolValue];
+            }
             result(@1);
         }
     } else if ([call.method isEqualToString:@"getLocation"]) {
@@ -144,9 +151,19 @@
 
 
 -(void) requestPermission {
-    if ([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"]
-        != nil) {
-        [self.clLocationManager requestWhenInUseAuthorization];
+    if (@available(iOS 11, *)) {
+        if (self.clLocationManager.allowsBackgroundLocationUpdates &&
+            [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysAndWhenInUseUsageDescription"]
+             != nil) {
+             [self.clLocationManager requestAlwaysAuthorization];
+            return;
+        }
+        else if (!self.clLocationManager.allowsBackgroundLocationUpdates &&
+            [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"]
+            != nil) {
+            [self.clLocationManager requestWhenInUseAuthorization];
+            return;
+        }
     }
     else if ([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"]
         != nil) {
